@@ -1,8 +1,8 @@
 import customtkinter as ctk
-
 from music21 import converter, note
 import serial
 import time
+from songs_to_go import SongSelectionTab
 
 class App:
     def __init__(self, master):
@@ -11,7 +11,6 @@ class App:
         self.master.geometry("800x700")  # Set a default window size
         
         self.current_index = -1
-        self.buttons = []
         self.songs = [
             {"name": "Twinkle Twinkle Little Star", "file": "Twinkle Twinkle Little Star.mxl"},
             {"name": "Jingle Bells", "file": "jingle_bells.mxl"},
@@ -21,66 +20,33 @@ class App:
             {"name": "Every Key", "file": "every_key.mxl"},
         ]
         
-        # Set appearance mode and color theme
         ctk.set_appearance_mode("System")
         ctk.set_default_color_theme("blue")
         
-        # Create main frame
         self.main_frame = ctk.CTkFrame(self.master)
         self.main_frame.pack(fill="both", expand=True)
         
-        # Create tabview
         self.tabview = ctk.CTkTabview(self.main_frame)
-        self.tabview.pack(fill="both", expand=True, pady=(0, 0))  # Add bottom padding for the bar
+        self.tabview.pack(fill="both", expand=True, pady=(0, 0))
         
-        # Create two tabs
         self.tab1 = self.tabview.add("Songs to Go")
         self.tab2 = self.tabview.add("Sight Reading")
         
-        # Create 4x4 grid in each tab
-        self.setup_tab1()
+        self.song_selection_tab = SongSelectionTab(self.tab1, self.songs, self.set_song)
+        self.song_selection_tab.pack(fill="both", expand=True)
+        
         self.setup_tab2()
         
-        # Create bottom bar
         self.bottom_bar = ctk.CTkFrame(self.master, height=0)
         self.bottom_bar.pack(side="bottom", fill="x")
         
-        # Create button in bottom bar
         self.button = ctk.CTkButton(self.bottom_bar, text="Play Song", command=self.button_click, bg_color="transparent")
         self.button.pack(expand=True, pady=(15, 25))
 
-    def setup_tab1(self):
-        for i in range(3):
-            for j in range(0, 3, 2):
-                button_index = i * 2 + j // 2
-                button = ctk.CTkButton(
-                    self.tab1, 
-                    border_width=1, 
-                    font=("Arial", 20),
-                    text=f"{self.songs[button_index]['name']}", 
-                    fg_color="#b145f5",  # Default color
-                    hover_color="#a425f5",  # Hover color
-                    border_color="#b145f5",  # Border color
-                    command=lambda idx=button_index: self.set_song(idx)
-                )
-                button.grid(row=i, column=j, columnspan=2, sticky="nsew", padx=5, pady=5)
-                self.buttons.append(button)  # Store button reference
-       
-        self.tab1.grid_rowconfigure((0, 1, 2), weight=1)
-        self.tab1.grid_columnconfigure((0, 1, 2, 3), weight=1)
-
     def set_song(self, index):
-        # Reset color of previously selected button
-        if self.current_index != -1 and self.current_index < len(self.buttons):
-            self.buttons[self.current_index].configure(fg_color="#b145f5", hover_color="#a425f5")  # Default color
-
         self.current_index = index
         print(f"Setting song to {self.current_index}: {self.songs[self.current_index]['name']}: {self.songs[self.current_index]['file']}")
-
-        # Set color of newly selected button
-        if self.current_index < len(self.buttons):
-            self.buttons[self.current_index].configure(fg_color="#e14cf5", hover_color="#e14cf5")
-
+        self.song_selection_tab.update_button_colors(self.current_index)
 
     def setup_tab2(self):
         # Create a frame for the camera view (16:9 aspect ratio)
@@ -132,7 +98,7 @@ class App:
     def button_click(self):
         if (self.current_index == -1):
             print("[ERROR] No song selected")
-        elif (self.current_index < len(self.buttons)):
+        elif (self.current_index < len(self.song_selection_tab.buttons)):
             print(f"Playing song {self.current_index}: {self.songs[self.current_index]['name']}: {self.songs[self.current_index]['file']}")
             
             score = converter.parse(self.songs[self.current_index]['file'])
