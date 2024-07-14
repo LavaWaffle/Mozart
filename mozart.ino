@@ -1,9 +1,9 @@
 // #include "Servo.h"
 #include <VarSpeedServo.h>
 #include <LiquidCrystal.h>
-#include <SharpIR.h>
+// #include <SharpIR.h>
 
-SharpIR distanceSensor(SharpIR::GP2Y0A41SK0F, A0);
+// SharpIR distanceSensor(SharpIR::GP2Y0A41SK0F, A0);
 
 const uint8_t rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
 
@@ -14,17 +14,17 @@ VarSpeedServo fingerServo;
 VarSpeedServo controlServo;
 
 //                      c    d    e   f   g   a   b   C
-uint8_t controlAngles[] = {135, 110, 92, 77, 66, 55, 43, 30};
+// uint8_t controlAngles[] = {135, 110, 92, 77, 66, 55, 43, 30};
 
 uint8_t noteToControlAngle(char note) {
     switch(note) {
         case 'c': return 131;
         case 'd': return 112;
-        case 'e': return 94;
-        case 'f': return 78;
-        case 'g': return 63;
-        case 'a': return 49;
-        case 'b': return 37;
+        case 'e': return 92;
+        case 'f': return 76;
+        case 'g': return 60;
+        case 'a': return 47;
+        case 'b': return 35;
         case 'C': return 30;
         default: 
           Serial.print("[NTCA] Error: Invalid input char {");

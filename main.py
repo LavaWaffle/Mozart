@@ -3,6 +3,7 @@ from music21 import converter, note
 import serial
 import time
 from songs_to_go import SongSelectionTab
+from sight_reader import SightReadingTab
 
 class App:
     def __init__(self, master):
@@ -15,7 +16,7 @@ class App:
             {"name": "Twinkle Twinkle Little Star", "file": "Twinkle Twinkle Little Star.mxl"},
             {"name": "Jingle Bells", "file": "Jingle Bells.mxl"},
             {"name": "Yankee Doodle", "file": "Yankee Doodle.mxl"},
-            {"name": "The Imperial March", "file": "The Imperial March.mxl"},
+            {"name": "Happy Birthday", "file": "Happy Birthday.mxl"},
             {"name": "C Major", "file": "C Major.mxl"},
             {"name": "Every Note", "file": "Every Note.mxl"},
         ]
@@ -35,7 +36,8 @@ class App:
         self.song_selection_tab = SongSelectionTab(self.tab1, self.songs, self.set_song)
         self.song_selection_tab.pack(fill="both", expand=True)
         
-        self.setup_tab2()
+        self.sight_reading_tab = SightReadingTab(self.tab2)  # Replace setup_tab2() with this
+        self.sight_reading_tab.pack(fill="both", expand=True)
         
         self.bottom_bar = ctk.CTkFrame(self.master, height=0)
         self.bottom_bar.pack(side="bottom", fill="x")
@@ -47,50 +49,6 @@ class App:
         self.current_index = index
         print(f"Setting song to {self.current_index}: {self.songs[self.current_index]['name']}: {self.songs[self.current_index]['file']}")
         self.song_selection_tab.update_button_colors(self.current_index)
-
-    def setup_tab2(self):
-        # Create a frame for the camera view (16:9 aspect ratio)
-        camera_frame = ctk.CTkFrame(self.tab2, fg_color="black")
-        camera_frame.place(relx=0.5, rely=0.3, anchor="center", relwidth=0.8, relheight=0.45)
-
-        # Ensure 16:9 aspect ratio
-        def maintain_aspect_ratio(event):
-            height = camera_frame.winfo_height()
-            width = int(height * 16 / 9)
-            camera_frame.configure(width=width)
-            # Recenter the frame
-            # camera_frame.place(relx=0.5, rely=0.3, anchor="center", width=width, height=height)
-
-        camera_frame.bind("<Configure>", maintain_aspect_ratio)
-
-        # Create a circular button in the bottom-right corner of the camera feed
-        camera_button = ctk.CTkButton(camera_frame, text="", width=30, height=30, 
-                                    corner_radius=15, fg_color="grey", 
-                                    hover_color="dark grey", 
-                                    command=self.camera_button_click)
-        camera_button.place(relx=0.97, rely=0.95, anchor="se")
-
-        # Create a frame for the sliders
-        slider_frame = ctk.CTkFrame(self.tab2)
-        slider_frame.place(relx=0.5, rely=0.75, anchor="center", relwidth=0.8, relheight=0.4)
-
-        # Create a 3x2 grid of sliders
-        sliders = ["Brightness", "Contrast", "Saturation", "Hue", "Sharpness", "Zoom"]
-        for i, slider_name in enumerate(sliders):
-            row = i // 2
-            col = i % 2
-
-            label = ctk.CTkLabel(slider_frame, text=slider_name)
-            label.grid(row=row*2, column=col, padx=10, pady=(10,0), sticky="sw")
-            
-            slider = ctk.CTkSlider(slider_frame, from_=0, to=100, number_of_steps=100)
-            slider.grid(row=row*2+1, column=col, padx=10, pady=(0,10), sticky="ew")
-
-        # Configure the grid
-        for i in range(3):
-            slider_frame.grid_rowconfigure(i*2+1, weight=1)
-        for i in range(2):
-            slider_frame.grid_columnconfigure(i, weight=1)
 
     def camera_button_click(self):
         print("Camera button clicked!")
