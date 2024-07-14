@@ -13,11 +13,11 @@ class App:
         self.current_index = -1
         self.songs = [
             {"name": "Twinkle Twinkle Little Star", "file": "Twinkle Twinkle Little Star.mxl"},
-            {"name": "Jingle Bells", "file": "jingle_bells.mxl"},
-            {"name": "chula", "file": "chula.mxl"},
-            {"name": "Yankee Doodle", "file": "yankee_doodle.mxl"},
-            {"name": "C Major", "file": "c_major.mxl"},
-            {"name": "Every Key", "file": "every_key.mxl"},
+            {"name": "Jingle Bells", "file": "Jingle Bells.mxl"},
+            {"name": "Yankee Doodle", "file": "Yankee Doodle.mxl"},
+            {"name": "The Imperial March", "file": "The Imperial March.mxl"},
+            {"name": "C Major", "file": "C Major.mxl"},
+            {"name": "Every Note", "file": "Every Note.mxl"},
         ]
         
         ctk.set_appearance_mode("System")
@@ -101,27 +101,49 @@ class App:
         elif (self.current_index < len(self.song_selection_tab.buttons)):
             print(f"Playing song {self.current_index}: {self.songs[self.current_index]['name']}: {self.songs[self.current_index]['file']}")
             
-            score = converter.parse(self.songs[self.current_index]['file'])
-            string = ""
+            score = converter.parse(f"songs/{self.songs[self.current_index]['file']}")
+            string = "6,c,1000\n\n\nS"
 
             # Iterate through all the notes in the score
             for element in score.recurse().notes:
                 if isinstance(element, note.Note):
-                    string += f"3,{element.name.lower()},{round(element.quarterLength*1000)}\n"  
+                    string += f"{element.octave},{element.name.lower()},{round(element.quarterLength*1000)}\n"  
                     # print(element.name)
                     print(f'Note: {element.nameWithOctave}, Duration: {element.quarterLength}, Offset: {element.offset}')
                 elif isinstance(element, note.Rest):
-                    string += f"3,r,{round(element.quarterLength*1000)}\n"
+                    string += f"4,r,{round(element.quarterLength*1000)}\n"
                     print(f'Rest, Duration: {element.quarterLength}, Offset: {element.offset}')
             
             string += "|"
             print("Finished reading file")
             print("Sending data to Arduino")
-
-            ser = serial.Serial('COM3', 9600)
+            print(string)
+            ser = serial.Serial('COM3', 115200)
             time.sleep(1)
-            ser.write(string.encode())
+            # send over the string in 10 character chunks
+            # ser.write(b'S')
+            for i in range(0, len(string), 10):
+                ser.write(string[i:i+10].encode('utf-8'))
+                time.sleep(0.1)
+            # print(string.encode('utf-8'))
+            # ser.write(string.encode('utf-8'))
             time.sleep(1)
+            # printout all the data that is read from the serial port
+            # stop while loop after 100 seconds
+            tim = 0
+            i = 0
+            # while True:
+            #     data = ser.readline()
+            #     try:
+            #         print(f"Read {i}: {data.decode()}", end="")
+            #     except Exception:
+            #         print(f"Read {i}: {data}", end="")
+            #     # print(data.decode())
+            #     i += 1
+            #     time.sleep(0.1)
+            #     tim += 0.1
+            #     if tim > 100:
+            #         break
             ser.close()
 
             print("Finished sending data")
