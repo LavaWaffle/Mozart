@@ -36,8 +36,10 @@ class App:
         self.song_selection_tab = SongSelectionTab(self.tab1, self.songs, self.set_song)
         self.song_selection_tab.pack(fill="both", expand=True)
         
-        self.sight_reading_tab = SightReadingTab(self.tab2)  # Replace setup_tab2() with this
+        self.sight_reading_tab = SightReadingTab(self.tab2, self.button_click)  # Replace setup_tab2() with this
         self.sight_reading_tab.pack(fill="both", expand=True)
+
+        self.master.protocol("WM_DELETE_WINDOW", self.on_closing)
         
         self.bottom_bar = ctk.CTkFrame(self.master, height=0)
         self.bottom_bar.pack(side="bottom", fill="x")
@@ -53,14 +55,20 @@ class App:
     def camera_button_click(self):
         print("Camera button clicked!")
 
-    def button_click(self):
-        if (self.current_index == -1):
+    def button_click(self, other=False):
+        if (self.current_index == -1 and other == False):
             print("[ERROR] No song selected")
-        elif (self.current_index < len(self.song_selection_tab.buttons)):
+        else:
             print(f"Playing song {self.current_index}: {self.songs[self.current_index]['name']}: {self.songs[self.current_index]['file']}")
+            score = ""
+            if (self.current_index < len(self.song_selection_tab.buttons) and other == False):
+                score = converter.parse(f"songs/{self.songs[self.current_index]['file']}")
+            else:
+                score = converter.parse(f"new_song/temp.mxl")
+            # score = converter.parse(f"songs/{self.songs[self.current_index]['file']}")
             
-            score = converter.parse(f"songs/{self.songs[self.current_index]['file']}")
-            string = "6,c,1000\n\n\nS"
+
+            string = "S"
 
             # Iterate through all the notes in the score
             for element in score.recurse().notes:
@@ -77,7 +85,7 @@ class App:
             print("Sending data to Arduino")
             print(string)
             ser = serial.Serial('COM3', 115200)
-            time.sleep(1)
+            time.sleep(5)
             # send over the string in 10 character chunks
             # ser.write(b'S')
             for i in range(0, len(string), 10):
@@ -109,6 +117,11 @@ class App:
 
             # self.play_song(self.songs[self.current_index]['file'])
         # print("Button clicked!")
+    
+    def on_closing(self):
+        if hasattr(self.sight_reading_tab, 'on_closing'):
+            self.sight_reading_tab.on_closing()
+        self.master.destroy()
 
 if __name__ == "__main__":
     root = ctk.CTk()
