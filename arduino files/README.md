@@ -16,4 +16,8 @@ This folder contains the Arduino sketch files for the project.
 
 ![Circuit Diagram](https://github.com/LavaWaffle/Mozart/blob/main/arduino%20files/Circuit.png?raw=true)
 
-- Note: There is no need for two Arduino boards (pwm pin 6 is unused on the main board). However, the secondary Arduino board was good practice for uart communication.
+- Note: Makeshift potentiometer is made via 10k resistor from 5v to a column, and a 1k resistor from the column to ground. That column is connected to the contrast pin of the LCD.
+
+# Fun Fact
+
+There is no need for two Arduino boards (pwm pin 6 is unused on the main board). However, the secondary Arduino board was good practice for uart communication.
