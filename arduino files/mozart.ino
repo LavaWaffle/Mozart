@@ -19,18 +19,36 @@ VarSpeedServo controlServo;
 uint8_t noteToControlAngle(char note) {
     switch(note) {
         case 'c': return 131;
-        case 'd': return 112;
-        case 'e': return 92;
-        case 'f': return 76;
-        case 'g': return 60;
-        case 'a': return 47;
-        case 'b': return 35;
+        case 'd': return 111;
+        case 'e': return 93;
+        case 'f': return 77;
+        case 'g': return 66;
+        case 'a': return 55;
+        case 'b': return 39;
         case 'C': return 30;
         default: 
           Serial.print("[NTCA] Error: Invalid input char {");
           Serial.print(note);
           Serial.println("}");
           return 128; // Return -1 for invalid input
+    }
+}
+
+uint8_t noteToServoAngle(char note) {
+    switch(note) {
+        case 'c': return 73;
+        case 'd': return 72;
+        case 'e': return 71;
+        case 'f': return 70;
+        case 'g': return 69;
+        case 'a': return 69;
+        case 'b': return 67;
+        case 'C': return 67;
+        default: 
+          Serial.print("[NTSA] Error: Invalid input char {");
+          Serial.print(note);
+          Serial.println("}");
+          return 70; // Return -1 for invalid input
     }
 }
 
@@ -54,7 +72,7 @@ Note song[60] = {
 };
 
 void up() {
-  fingerServo.write(105);
+  fingerServo.write(95);
 }
 
 void setup() {
@@ -110,7 +128,7 @@ char incomingByte;
       if (!dataStarted && incomingByte == 'S') {
         dataStarted = true;
         lcd.clear();
-        lcd.write("YAY");
+        lcd.write("Processing...");
         Serial.println("GOOD NEWS");
         continue;
       }
@@ -170,23 +188,40 @@ char incomingByte;
     Note currentNote = song[i];
     if (currentNote.terminator) {
       toOctave(currentOctave, 4);
-      lcd.write("Done!");
+      lcd.write("Song Done!");
+      delay(5000);
+      lcd.clear();
+      lcd.write("Mozart");
       return;
     }
     int controlServoAngle = noteToControlAngle(currentNote.note);
+    if (currentNote.octave == 7) {
+      controlServoAngle = noteToControlAngle('C');
+    }
     lcd.write("I |N|O| A | Dur");
     lcd.setCursor(0, 1);
-    sprintf(buffet, "%d|%c|%d|%d|%d", i, currentNote.note, currentNote.octave, controlServoAngle, currentOctave);
+    sprintf(buffet, "%d|%c|%d|%d|%d|%d", i, currentNote.note, currentNote.octave, controlServoAngle, currentOctave, currentNote.duration);
     lcd.write(buffet);
     sprintf(buffer, "Index: %d, Note: %c, Duration: %d, Octave: %d, CAngle: %d", i, currentNote.note, currentNote.duration, currentNote.octave, controlServoAngle);
     // Serial.println(buffer);
+
+    if (currentNote.note == 'r') {
+      delay(currentNote.duration);
+      continue;
+    }
+
     unsigned long startTime = millis();  // Get the start time
 
     // Perform the servo write operation
-    controlServo.write(controlServoAngle, 79);
+    controlServo.write(controlServoAngle, 50);
     // Calculate how much time has passed
-    toOctave(currentOctave, currentNote.octave);
-    currentOctave = currentNote.octave; 
+    if (currentNote.octave >= 7) {
+      toOctave(currentOctave, 6);
+      currentOctave = 6;
+    } else {
+      toOctave(currentOctave, currentNote.octave);
+      currentOctave = currentNote.octave; 
+    }
     while (controlServo.isMoving()) {
       delay(5);
     }
@@ -198,7 +233,7 @@ char incomingByte;
     }
     // Serial.print("OWO: ");
     // Serial.println(controlServo.read());
-    fingerServo.write(69);
+    fingerServo.write(noteToServoAngle(currentNote.note));
     delay(currentNote.duration);
     up();
     delay(0);

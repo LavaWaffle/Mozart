@@ -8,7 +8,7 @@ from sight_reader import SightReadingTab
 class App:
     def __init__(self, master):
         self.master = master
-        self.master.title("Custom App")
+        self.master.title("Mozart App")
         self.master.geometry("800x700")  # Set a default window size
         
         self.current_index = -1
